@@ -1,0 +1,6 @@
+*.c~
+*.fct
+*.cci
+*.cof
+Debug/
+Release/
