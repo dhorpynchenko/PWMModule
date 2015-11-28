@@ -23,8 +23,22 @@ Data Stack size         : 32
 #include <tiny2313a.h>
 #include "pwm_module_hardware.c"
 
-// Declare your global variables here
-char current_digit = 0;
+#define DISPLAY_FRAMES_PER_DIGIT 4
+
+unsigned char channel_1_setting = 0;
+unsigned char channel_2_setting = 0;
+
+//
+unsigned char current_digit = 0;
+unsigned char display_frames = 0;
+unsigned char button_pressed_frames = 0;
+
+bit is_button_plus_was_pressed = 0;
+bit is_button_minus_was_pressed = 0;
+bit is_button_channel_was_pressed = 0;
+
+
+
 
 void main(void)
 {
@@ -141,5 +155,8 @@ while (1)
 // TIMER0 interrupt service routine
 interrupt [TIM0_OVF] void timer0_int(void)
 {
-
+    // Interupts every 4ms
+    // 
+    
+    
 }
