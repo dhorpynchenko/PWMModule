@@ -42,29 +42,30 @@ CLKPR=(0<<CLKPCE) | (0<<CLKPS3) | (0<<CLKPS2) | (0<<CLKPS1) | (0<<CLKPS0);
 // Port A initialization
 // Function: Bit2=In Bit1=In Bit0=In 
 DDRA=(0<<DDA2) | (0<<DDA1) | (0<<DDA0);
-// State: Bit2=P Bit1=P Bit0=P 
-PORTA=(1<<PORTA2) | (1<<PORTA1) | (1<<PORTA0);
+// State: Bit2=T Bit1=P Bit0=P 
+PORTA=(0<<PORTA2) | (1<<PORTA1) | (1<<PORTA0);
 
 // Port B initialization
-// Function: Bit7=In Bit6=Out Bit5=Out Bit4=Out Bit3=Out Bit2=Out Bit1=Out Bit0=Out 
-DDRB=(0<<DDB7) | (1<<DDB6) | (1<<DDB5) | (1<<DDB4) | (1<<DDB3) | (1<<DDB2) | (1<<DDB1) | (1<<DDB0);
-// State: Bit7=P Bit6=0 Bit5=0 Bit4=0 Bit3=0 Bit2=0 Bit1=0 Bit0=0 
-PORTB=(1<<PORTB7) | (0<<PORTB6) | (0<<PORTB5) | (0<<PORTB4) | (0<<PORTB3) | (0<<PORTB2) | (0<<PORTB1) | (0<<PORTB0);
+// Function: Bit7=Out Bit6=Out Bit5=Out Bit4=Out Bit3=Out Bit2=Out Bit1=Out Bit0=Out 
+DDRB=(1<<DDB7) | (1<<DDB6) | (1<<DDB5) | (1<<DDB4) | (1<<DDB3) | (1<<DDB2) | (1<<DDB1) | (1<<DDB0);
+// State: Bit7=0 Bit6=0 Bit5=0 Bit4=0 Bit3=0 Bit2=0 Bit1=0 Bit0=0 
+PORTB=(0<<PORTB7) | (0<<PORTB6) | (0<<PORTB5) | (0<<PORTB4) | (0<<PORTB3) | (0<<PORTB2) | (0<<PORTB1) | (0<<PORTB0);
 
 // Port D initialization
-// Function: Bit6=Out Bit5=Out Bit4=Out Bit3=Out Bit2=Out Bit1=In Bit0=In 
-DDRD=(1<<DDD6) | (1<<DDD5) | (1<<DDD4) | (1<<DDD3) | (1<<DDD2) | (0<<DDD1) | (0<<DDD0);
-// State: Bit6=0 Bit5=0 Bit4=0 Bit3=0 Bit2=0 Bit1=P Bit0=P 
-PORTD=(0<<PORTD6) | (0<<PORTD5) | (0<<PORTD4) | (0<<PORTD3) | (0<<PORTD2) | (1<<PORTD1) | (1<<PORTD0);
+// Function: Bit6=Out Bit5=Out Bit4=Out Bit3=Out Bit2=Out Bit1=In Bit0=Out 
+DDRD=(1<<DDD6) | (1<<DDD5) | (1<<DDD4) | (1<<DDD3) | (1<<DDD2) | (0<<DDD1) | (1<<DDD0);
+// State: Bit6=0 Bit5=0 Bit4=0 Bit3=0 Bit2=0 Bit1=P Bit0=0 
+PORTD=(0<<PORTD6) | (0<<PORTD5) | (0<<PORTD4) | (0<<PORTD3) | (0<<PORTD2) | (1<<PORTD1) | (0<<PORTD0);
 
 // Timer/Counter 0 initialization
 // Clock source: System Clock
-// Clock value: Timer 0 Stopped
+// Clock value: 62,500 kHz
 // Mode: Normal top=0xFF
 // OC0A output: Disconnected
 // OC0B output: Disconnected
+// Timer Period: 4,096 ms
 TCCR0A=(0<<COM0A1) | (0<<COM0A0) | (0<<COM0B1) | (0<<COM0B0) | (0<<WGM01) | (0<<WGM00);
-TCCR0B=(0<<WGM02) | (0<<CS02) | (0<<CS01) | (0<<CS00);
+TCCR0B=(0<<WGM02) | (0<<CS02) | (1<<CS01) | (1<<CS00);
 TCNT0=0x00;
 OCR0A=0x00;
 OCR0B=0x00;
@@ -79,7 +80,8 @@ OCR0B=0x00;
 // Input Capture on Falling Edge
 // Timer Period: 0,064 ms
 // Output Pulse(s):
-// OC1A Period: 0,064 ms Width: 0 us// OC1B Period: 0,064 ms Width: 0 us
+// OC1A Period: 0,064 ms Width: 0 us
+// OC1B Period: 0,064 ms Width: 0 us
 // Timer1 Overflow Interrupt: Off
 // Input Capture Interrupt: Off
 // Compare A Match Interrupt: Off
@@ -130,11 +132,9 @@ DIDR=(0<<AIN0D) | (0<<AIN1D);
 
 
 while (1)
-      {  
-          show_digit_value(1);
-          show_digit(1);
-      
-       
+      {
+      // Place your code here
+
       }
 }
 
