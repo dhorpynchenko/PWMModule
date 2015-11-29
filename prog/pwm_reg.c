@@ -24,21 +24,32 @@ Data Stack size         : 32
 #include "pwm_module_hardware.c"
 
 #define DISPLAY_FRAMES_PER_DIGIT 4
+#define SETTING_MIN_VALUE 0
+#define SETTING_MAX_VALUE 99
 
-unsigned char channel_1_setting = 0;
-unsigned char channel_2_setting = 0;
+eeprom unsigned char channel_1_setting;
+eeprom unsigned char channel_2_setting;
+
+unsigned char channel_1_setting_buffer;
+unsigned char channel_2_setting_buffer;
 
 //
 unsigned char current_digit = 0;
 unsigned char display_frames = 0;
+unsigned char current_channel = 0;
 unsigned char button_pressed_frames = 0;
 
 bit is_button_plus_was_pressed = 0;
 bit is_button_minus_was_pressed = 0;
 bit is_button_channel_was_pressed = 0;
 
+bit do_save_channel_1_setting = 0;
+bit do_save_channel_2_setting = 0;  
 
-
+void init()  {
+  channel_1_setting_buffer = channel_1_setting;
+  channel_2_setting_buffer = channel_2_setting;
+}
 
 void main(void)
 {
@@ -144,19 +155,128 @@ ACSR=(1<<ACD) | (0<<ACBG) | (0<<ACO) | (0<<ACI) | (0<<ACIE) | (0<<ACIC) | (0<<AC
 // Digital input buffer on AIN1: On
 DIDR=(0<<AIN0D) | (0<<AIN1D);
 
-
+init();
 while (1)
       {
-      // Place your code here
+      // save to eeprom
+          if(do_save_channel_1_setting){ 
+               do_save_channel_1_setting = 0;
+               channel_1_setting = channel_1_setting_buffer;
+          } else if(do_save_channel_2_setting) {
+               do_save_channel_2_setting = 0;
+               channel_2_setting = channel_2_setting_buffer;
+          }
 
       }
 }
+
+void apply_channel_1_value(){
+
+}
+
+void apply_channel_2_value(){
+
+}
+
+void handle_buttons(){
+
+   if(BUTTON_PLUS_PRESSED && !is_button_plus_was_pressed) {
+      is_button_plus_was_pressed = 1;
+      if(current_channel == 0){
+           channel_1_setting_buffer++;
+           apply_channel_1_value();
+      } else {
+           channel_2_setting_buffer++;
+           apply_channel_2_value();
+      }
+      
+      return;
+      
+   } else if (BUTTON_PLUS_PRESSED && is_button_plus_was_pressed){
+   
+   
+   
+   } else if (!BUTTON_PLUS_PRESSED && is_button_plus_was_pressed){
+      is_button_plus_was_pressed = 0;
+      // save to eeprom
+      if(current_channel == 0){
+           do_save_channel_1_setting = 1;
+      } else {
+            do_save_channel_2_setting = 1;
+      }
+      
+      return;
+   }
+   
+      if(BUTTON_PLUS_PRESSED && !is_button_plus_was_pressed) {
+      is_button_plus_was_pressed = 1;
+      if(current_channel == 0){
+           channel_1_setting_buffer++;
+           apply_channel_1_value();
+      } else {
+           channel_2_setting_buffer++;
+           apply_channel_2_value();
+      }
+      
+      return;
+      
+   } else if (BUTTON_PLUS_PRESSED && is_button_plus_was_pressed){
+   
+   
+   
+   } else if (!BUTTON_PLUS_PRESSED && is_button_plus_was_pressed){
+      is_button_plus_was_pressed = 0;
+      // save to eeprom
+      if(current_channel == 0){
+           do_save_channel_1_setting = 1;
+      } else {
+            do_save_channel_2_setting = 1;
+      }
+      
+      return;
+   }
+   
+   if(BUTTON_CHANNEL_PRESSED && !is_button_channel_was_pressed) {
+      is_button_channel_was_pressed = 1;
+      current_channel = current_channel == 0 ? 1 : 0;
+      return;
+      
+   } else if (!BUTTON_CHANNEL_PRESSED && is_button_channel_was_pressed){
+      is_button_channel_was_pressed = 0;
+      return;
+   }
+}
+
+void invalidate_display(){
+   if(display_frames > DISPLAY_FRAMES_PER_DIGIT){
+      display_frames = 1;
+      if(current_digit == 0) {
+            current_digit = 1;
+            show_digit_value((current_channel == 0 ? channel_1_setting_buffer : channel_2_setting_buffer) / 10);
+            
+      } else {
+           current_digit = 0;
+           show_digit_value((current_channel == 0 ? channel_1_setting_buffer : channel_2_setting_buffer) % 10);
+      }
+      
+      show_digit(current_digit);
+      
+   } else {
+      display_frames++;
+   }
+}
+
+/*
+bool is_more_one_buttton_pressed(){
+ return (BUTTON_PLUS_PRESSED && BUTTON_MINUS_PRESSSED) || (BUTTON_PLUS_PRESSED && BUTTON_CHANNEL_PRESSED) || (BUTTON_CHANNEL_PRESSED && BUTTON_MINUS_PRESSSED);
+} */
 
 // TIMER0 interrupt service routine
 interrupt [TIM0_OVF] void timer0_int(void)
 {
     // Interupts every 4ms
-    // 
-    
-    
+    invalidate_display();
+    handle_buttons();
 }
+
+
