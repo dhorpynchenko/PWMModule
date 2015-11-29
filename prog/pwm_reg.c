@@ -26,6 +26,7 @@ Data Stack size         : 32
 #define DISPLAY_FRAMES_PER_DIGIT 4
 #define SETTING_MIN_VALUE 0
 #define SETTING_MAX_VALUE 99
+#define SETTING_MAX_VALUE_HEX 0x63
 
 eeprom unsigned char channel_1_setting;
 eeprom unsigned char channel_2_setting;
@@ -44,11 +45,35 @@ bit is_button_minus_was_pressed = 0;
 bit is_button_channel_was_pressed = 0;
 
 bit do_save_channel_1_setting = 0;
-bit do_save_channel_2_setting = 0;  
+bit do_save_channel_2_setting = 0;
+
+void apply_channel_1_value(){
+    OCR1AH = 0x00;
+  OCR1AL = channel_1_setting_buffer;
+}
+
+void apply_channel_2_value(){
+    OCR1BH = 0x00;
+  OCR1BL = channel_2_setting_buffer;
+}  
 
 void init()  {
+
+    #asm("cli");
+
+    // reed from eeprom
   channel_1_setting_buffer = channel_1_setting;
   channel_2_setting_buffer = channel_2_setting;
+  
+  // init timer1 TOP to max value
+  ICR1H=0x00;
+  ICR1L=SETTING_MAX_VALUE_HEX;
+  
+  // apply settings for channels
+  apply_channel_1_value();
+  apply_channel_1_value();
+  
+  #asm("sei");
 }
 
 void main(void)
@@ -71,16 +96,16 @@ DDRA=(0<<DDA2) | (0<<DDA1) | (0<<DDA0);
 PORTA=(0<<PORTA2) | (1<<PORTA1) | (1<<PORTA0);
 
 // Port B initialization
-// Function: Bit7=Out Bit6=Out Bit5=Out Bit4=Out Bit3=Out Bit2=Out Bit1=Out Bit0=Out 
-DDRB=(1<<DDB7) | (1<<DDB6) | (1<<DDB5) | (1<<DDB4) | (1<<DDB3) | (1<<DDB2) | (1<<DDB1) | (1<<DDB0);
-// State: Bit7=0 Bit6=0 Bit5=0 Bit4=0 Bit3=0 Bit2=0 Bit1=0 Bit0=0 
-PORTB=(0<<PORTB7) | (0<<PORTB6) | (0<<PORTB5) | (0<<PORTB4) | (0<<PORTB3) | (0<<PORTB2) | (0<<PORTB1) | (0<<PORTB0);
+// Function: Bit7=In Bit6=Out Bit5=Out Bit4=Out Bit3=Out Bit2=Out Bit1=Out Bit0=Out 
+DDRB=(0<<DDB7) | (1<<DDB6) | (1<<DDB5) | (1<<DDB4) | (1<<DDB3) | (1<<DDB2) | (1<<DDB1) | (1<<DDB0);
+// State: Bit7=P Bit6=0 Bit5=0 Bit4=0 Bit3=0 Bit2=0 Bit1=0 Bit0=0 
+PORTB=(1<<PORTB7) | (0<<PORTB6) | (0<<PORTB5) | (0<<PORTB4) | (0<<PORTB3) | (0<<PORTB2) | (0<<PORTB1) | (0<<PORTB0);
 
 // Port D initialization
-// Function: Bit6=Out Bit5=Out Bit4=Out Bit3=Out Bit2=Out Bit1=In Bit0=Out 
-DDRD=(1<<DDD6) | (1<<DDD5) | (1<<DDD4) | (1<<DDD3) | (1<<DDD2) | (0<<DDD1) | (1<<DDD0);
-// State: Bit6=0 Bit5=0 Bit4=0 Bit3=0 Bit2=0 Bit1=P Bit0=0 
-PORTD=(0<<PORTD6) | (0<<PORTD5) | (0<<PORTD4) | (0<<PORTD3) | (0<<PORTD2) | (1<<PORTD1) | (0<<PORTD0);
+// Function: Bit6=Out Bit5=Out Bit4=Out Bit3=Out Bit2=Out Bit1=Out Bit0=Out 
+DDRD=(1<<DDD6) | (1<<DDD5) | (1<<DDD4) | (1<<DDD3) | (1<<DDD2) | (1<<DDD1) | (1<<DDD0);
+// State: Bit6=0 Bit5=0 Bit4=0 Bit3=0 Bit2=0 Bit1=0 Bit0=0 
+PORTD=(0<<PORTD6) | (0<<PORTD5) | (0<<PORTD4) | (0<<PORTD3) | (0<<PORTD2) | (0<<PORTD1) | (0<<PORTD0);
 
 // Timer/Counter 0 initialization
 // Clock source: System Clock
@@ -111,16 +136,16 @@ OCR0B=0x00;
 // Input Capture Interrupt: Off
 // Compare A Match Interrupt: Off
 // Compare B Match Interrupt: Off
-TCCR1A=(1<<COM1A1) | (0<<COM1A0) | (1<<COM1B1) | (0<<COM1B0) | (0<<WGM11) | (1<<WGM10);
-TCCR1B=(0<<ICNC1) | (0<<ICES1) | (0<<WGM13) | (1<<WGM12) | (0<<CS12) | (0<<CS11) | (1<<CS10);
+TCCR1A=(1<<COM1A1) | (0<<COM1A0) | (1<<COM1B1) | (0<<COM1B0) | (1<<WGM11) | (0<<WGM10);
+TCCR1B=(0<<ICNC1) | (0<<ICES1) | (1<<WGM13) | (1<<WGM12) | (0<<CS12) | (0<<CS11) | (1<<CS10);
 TCNT1H=0x00;
 TCNT1L=0x00;
-ICR1H=0x00;
-ICR1L=0x00;
-OCR1AH=0x00;
-OCR1AL=0x00;
-OCR1BH=0x00;
-OCR1BL=0x00;
+//ICR1H=0x00;
+//ICR1L=0x00;
+//OCR1AH=0x00;
+//OCR1AL=0x00;
+//OCR1BH=0x00;
+//OCR1BL=0x00;
 
 // Timer(s)/Counter(s) Interrupt(s) initialization
 TIMSK=(0<<TOIE1) | (0<<OCIE1A) | (0<<OCIE1B) | (0<<ICIE1) | (0<<OCIE0B) | (0<<TOIE0) | (0<<OCIE0A);
@@ -170,26 +195,39 @@ while (1)
       }
 }
 
-void apply_channel_1_value(){
-
+void increase_current_channel_setting_buffer(){
+      if(current_channel == 0){
+         if(channel_1_setting_buffer < SETTING_MAX_VALUE) {
+           channel_1_setting_buffer++;
+           apply_channel_1_value(); 
+         }
+      } else {
+        if(channel_2_setting_buffer < SETTING_MAX_VALUE) {
+           channel_2_setting_buffer++;
+           apply_channel_2_value();
+        }
+      }
 }
 
-void apply_channel_2_value(){
-
+void decrease_current_channel_setting_buffer(){
+    if(current_channel == 0){
+        if(channel_1_setting_buffer > SETTING_MIN_VALUE) {
+           channel_1_setting_buffer--;
+           apply_channel_1_value();
+        }
+      } else {
+        if(channel_2_setting_buffer > SETTING_MIN_VALUE) {
+           channel_2_setting_buffer--;
+           apply_channel_2_value();
+        }
+      }
 }
 
 void handle_buttons(){
-
+   // plus
    if(BUTTON_PLUS_PRESSED && !is_button_plus_was_pressed) {
       is_button_plus_was_pressed = 1;
-      if(current_channel == 0){
-           channel_1_setting_buffer++;
-           apply_channel_1_value();
-      } else {
-           channel_2_setting_buffer++;
-           apply_channel_2_value();
-      }
-      
+      increase_current_channel_setting_buffer();
       return;
       
    } else if (BUTTON_PLUS_PRESSED && is_button_plus_was_pressed){
@@ -208,24 +246,18 @@ void handle_buttons(){
       return;
    }
    
-      if(BUTTON_PLUS_PRESSED && !is_button_plus_was_pressed) {
-      is_button_plus_was_pressed = 1;
-      if(current_channel == 0){
-           channel_1_setting_buffer++;
-           apply_channel_1_value();
-      } else {
-           channel_2_setting_buffer++;
-           apply_channel_2_value();
-      }
-      
+   // minus  
+   if(BUTTON_MINUS_PRESSSED && !is_button_minus_was_pressed) {
+      is_button_minus_was_pressed = 1;
+      decrease_current_channel_setting_buffer();
       return;
       
-   } else if (BUTTON_PLUS_PRESSED && is_button_plus_was_pressed){
+   } else if (BUTTON_MINUS_PRESSSED && is_button_minus_was_pressed){
    
    
    
-   } else if (!BUTTON_PLUS_PRESSED && is_button_plus_was_pressed){
-      is_button_plus_was_pressed = 0;
+   } else if (!BUTTON_MINUS_PRESSSED && is_button_minus_was_pressed){
+      is_button_minus_was_pressed = 0;
       // save to eeprom
       if(current_channel == 0){
            do_save_channel_1_setting = 1;
@@ -236,6 +268,7 @@ void handle_buttons(){
       return;
    }
    
+   // channel
    if(BUTTON_CHANNEL_PRESSED && !is_button_channel_was_pressed) {
       is_button_channel_was_pressed = 1;
       current_channel = current_channel == 0 ? 1 : 0;
