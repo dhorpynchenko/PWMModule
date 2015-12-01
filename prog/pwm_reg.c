@@ -73,6 +73,10 @@ void init()  {
   apply_channel_1_value();
   apply_channel_1_value();
   
+  // show channel 1 led
+  LED_CHANNEL_1 = 1;
+  LED_CHANNEL_2 = 0;
+  
   #asm("sei");
 }
 
@@ -148,7 +152,7 @@ TCNT1L=0x00;
 //OCR1BL=0x00;
 
 // Timer(s)/Counter(s) Interrupt(s) initialization
-TIMSK=(0<<TOIE1) | (0<<OCIE1A) | (0<<OCIE1B) | (0<<ICIE1) | (0<<OCIE0B) | (0<<TOIE0) | (0<<OCIE0A);
+TIMSK=(0<<TOIE1) | (0<<OCIE1A) | (0<<OCIE1B) | (0<<ICIE1) | (0<<OCIE0B) | (1<<TOIE0) | (0<<OCIE0A);
 
 // External Interrupt(s) initialization
 // INT0: Off
@@ -271,7 +275,15 @@ void handle_buttons(){
    // channel
    if(BUTTON_CHANNEL_PRESSED && !is_button_channel_was_pressed) {
       is_button_channel_was_pressed = 1;
-      current_channel = current_channel == 0 ? 1 : 0;
+      if(current_channel == 0){
+         current_channel = 1;
+         LED_CHANNEL_1 = 0;
+         LED_CHANNEL_2 = 1;
+      } else {
+         current_channel = 0;
+         LED_CHANNEL_1 = 1;
+         LED_CHANNEL_2 = 0;
+      }
       return;
       
    } else if (!BUTTON_CHANNEL_PRESSED && is_button_channel_was_pressed){
