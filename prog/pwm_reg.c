@@ -28,6 +28,9 @@ Data Stack size         : 32
 #define SETTING_MAX_VALUE 99
 #define SETTING_MAX_VALUE_HEX 0x63
 
+#define AUTOINCREMENT_FIRST_STEP 800
+#define AUTOINCREMENT_STEP 300
+
 eeprom unsigned char channel_1_setting;
 eeprom unsigned char channel_2_setting;
 
@@ -38,7 +41,7 @@ volatile unsigned char channel_2_setting_buffer;
 volatile unsigned char current_digit = 0;
 volatile unsigned char display_frames = 0;
 volatile unsigned char current_channel = 0;
-volatile unsigned char button_pressed_frames = 0;
+volatile unsigned int button_pressed_frames = 0;
 
 volatile bit is_button_plus_was_pressed = 0;
 volatile bit is_button_minus_was_pressed = 0;
@@ -249,12 +252,20 @@ void handle_buttons(){
       increase_current_channel_setting_buffer();
       return;
       
-   } else if (BUTTON_PLUS_PRESSED && is_button_plus_was_pressed){
-   
-   
+   } else if (BUTTON_PLUS_PRESSED && is_button_plus_was_pressed){  
+        button_pressed_frames++;
+      if(button_pressed_frames == AUTOINCREMENT_FIRST_STEP) {
+        increase_current_channel_setting_buffer();
+      } else if(button_pressed_frames == AUTOINCREMENT_FIRST_STEP + AUTOINCREMENT_STEP) {  
+        button_pressed_frames = AUTOINCREMENT_FIRST_STEP;
+        increase_current_channel_setting_buffer();
+      }
+      
+      return;
    
    } else if (!BUTTON_PLUS_PRESSED && is_button_plus_was_pressed){
       is_button_plus_was_pressed = 0;
+      button_pressed_frames = 0;
       // save to eeprom
       if(current_channel == 0){
            do_save_channel_1_setting = 1;
@@ -272,11 +283,19 @@ void handle_buttons(){
       return;
       
    } else if (BUTTON_MINUS_PRESSSED && is_button_minus_was_pressed){
-   
-   
+      button_pressed_frames++;
+      if(button_pressed_frames == AUTOINCREMENT_FIRST_STEP) {
+           decrease_current_channel_setting_buffer();
+      } else if(button_pressed_frames == AUTOINCREMENT_FIRST_STEP + AUTOINCREMENT_STEP) {  
+        button_pressed_frames = AUTOINCREMENT_FIRST_STEP;
+        decrease_current_channel_setting_buffer();
+      }
+      
+      return;
    
    } else if (!BUTTON_MINUS_PRESSSED && is_button_minus_was_pressed){
-      is_button_minus_was_pressed = 0;
+      is_button_minus_was_pressed = 0; 
+      button_pressed_frames = 0;
       // save to eeprom
       if(current_channel == 0){
            do_save_channel_1_setting = 1;
