@@ -31,21 +31,21 @@ Data Stack size         : 32
 eeprom unsigned char channel_1_setting;
 eeprom unsigned char channel_2_setting;
 
-unsigned char channel_1_setting_buffer;
-unsigned char channel_2_setting_buffer;
+volatile unsigned char channel_1_setting_buffer;
+volatile unsigned char channel_2_setting_buffer;
 
 //
-unsigned char current_digit = 0;
-unsigned char display_frames = 0;
-unsigned char current_channel = 0;
-unsigned char button_pressed_frames = 0;
+volatile unsigned char current_digit = 0;
+volatile unsigned char display_frames = 0;
+volatile unsigned char current_channel = 0;
+volatile unsigned char button_pressed_frames = 0;
 
-bit is_button_plus_was_pressed = 0;
-bit is_button_minus_was_pressed = 0;
-bit is_button_channel_was_pressed = 0;
+volatile bit is_button_plus_was_pressed = 0;
+volatile bit is_button_minus_was_pressed = 0;
+volatile bit is_button_channel_was_pressed = 0;
 
-bit do_save_channel_1_setting = 0;
-bit do_save_channel_2_setting = 0;
+volatile bit do_save_channel_1_setting = 0;
+volatile bit do_save_channel_2_setting = 0;
 
 void apply_channel_1_value(){
     OCR1AH = 0x00;
@@ -64,6 +64,18 @@ void init()  {
     // reed from eeprom
   channel_1_setting_buffer = channel_1_setting;
   channel_2_setting_buffer = channel_2_setting;
+  
+  // do limits check. if eeprom has wrong value 
+  // usually triggers on first start
+  if(channel_1_setting_buffer > SETTING_MAX_VALUE){
+    channel_1_setting_buffer = 0; 
+    do_save_channel_1_setting = 1;
+  }
+  
+  if(channel_2_setting_buffer > SETTING_MAX_VALUE){
+    channel_2_setting_buffer = 0; 
+    do_save_channel_2_setting = 1;
+  }
   
   // init timer1 TOP to max value
   ICR1H=0x00;
@@ -106,7 +118,7 @@ PORTA=(0<<PORTA2) | (1<<PORTA1) | (1<<PORTA0);
 // Function: Bit7=In Bit6=Out Bit5=Out Bit4=Out Bit3=Out Bit2=Out Bit1=Out Bit0=Out 
 DDRB=(0<<DDB7) | (1<<DDB6) | (1<<DDB5) | (1<<DDB4) | (1<<DDB3) | (1<<DDB2) | (1<<DDB1) | (1<<DDB0);
 // State: Bit7=P Bit6=0 Bit5=0 Bit4=0 Bit3=0 Bit2=0 Bit1=0 Bit0=0 
-PORTB=(1<<PORTB7) | (0<<PORTB6) | (0<<PORTB5) | (0<<PORTB4) | (0<<PORTB3) | (0<<PORTB2) | (0<<PORTB1) | (0<<PORTB0);
+PORTB=(1<<PORTB7) | (0<<PORTB6) | (0<<PORTB5) | (0<<PORTB4) | (0<<PORTB3) | (1<<PORTB2) | (1<<PORTB1) | (0<<PORTB0);
 
 // Port D initialization
 // Function: Bit6=Out Bit5=Out Bit4=Out Bit3=Out Bit2=Out Bit1=Out Bit0=Out 
@@ -122,7 +134,7 @@ PORTD=(0<<PORTD6) | (0<<PORTD5) | (0<<PORTD4) | (0<<PORTD3) | (0<<PORTD2) | (0<<
 // OC0B output: Disconnected
 // Timer Period: 4,096 ms
 TCCR0A=(0<<COM0A1) | (0<<COM0A0) | (0<<COM0B1) | (0<<COM0B0) | (0<<WGM01) | (0<<WGM00);
-TCCR0B=(0<<WGM02) | (0<<CS02) | (1<<CS01) | (1<<CS00);
+TCCR0B=(0<<WGM02) | (0<<CS02) | (1<<CS01) | (0<<CS00);
 TCNT0=0x00;
 OCR0A=0x00;
 OCR0B=0x00;

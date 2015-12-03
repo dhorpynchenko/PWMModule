@@ -41,7 +41,7 @@
 #define DISPLAY_0 PORTD = ~((1<<DISPLAY_A) | (1<<DISPLAY_B) | (1<<DISPLAY_C)| (1<<DISPLAY_D)| (1<<DISPLAY_E)| (1<<DISPLAY_F))
 
 // 1
-#define DISPLAY_1 PORTD = ~((1<<DISPLAY_A) | (1<<DISPLAY_B))
+#define DISPLAY_1 PORTD = ~((1<<DISPLAY_B) | (1<<DISPLAY_C))
 
 // 2
 #define DISPLAY_2 PORTD = ~((1<<DISPLAY_A) | (1<<DISPLAY_B) | (1<<DISPLAY_G)| (1<<DISPLAY_E)| (1<<DISPLAY_D))
