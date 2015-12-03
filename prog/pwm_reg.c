@@ -77,6 +77,9 @@ void init()  {
   LED_CHANNEL_1 = 1;
   LED_CHANNEL_2 = 0;
   
+  // hide dot
+  CLEAR_DISPLAY_DP;
+  
   #asm("sei");
 }
 
